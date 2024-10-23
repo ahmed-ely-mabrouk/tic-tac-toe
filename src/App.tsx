@@ -4,7 +4,7 @@ import { GameBoard } from "./components/game-board";
 
 function App() {
   return (
-    <div className="App flex flex-col justify-center w-[450px]">
+    <div className="App flex flex-col justify-center">
       <h1 className="text-6xl mb-6 mt-2 font-semibold">
         Tic Tac <span className="text-icon-blue">Toe</span>
       </h1>

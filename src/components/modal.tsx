@@ -6,7 +6,7 @@ interface IModal {
 }
 export const Modal = ({ winner, onReset }: IModal) => {
   return (
-    <div className="w-screen h-screen absolute top-0 bottom-0 right-0 bg-black bg-opacity-45 flex items-center justify-center">
+    <div className="w-full h-full absolute top-0 bottom-0 right-0 bg-black bg-opacity-45 flex items-center justify-center">
       <div className="w-[450px] bg-light-gray rounded-xl p-4">
         {winner !== "Draw" ? (
           <div className="flex items-center justify-center">

@@ -2,24 +2,23 @@ import { useEffect, useState } from "react";
 import { Modal } from "./modal";
 import { Button } from "./button";
 import { Score } from "./score";
-
-const winningCombinations = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
-];
+import { generateWinningCombinations } from "../utils/combinations";
 
 export const GameBoard = () => {
-  const [boxes, setBoxes] = useState<string[]>(Array(9).fill(""));
+  const defaultGrid = 3;
+  const containerSize = 450;
+  const [gridSize, setGridSize] = useState<number>(defaultGrid);
+  const ratio = containerSize / gridSize;
+  const [boxes, setBoxes] = useState<string[]>(
+    Array(gridSize * gridSize).fill("")
+  );
   const [isXTurn, setIsXTurn] = useState<boolean>(true);
   const [winner, setWinner] = useState<string>("");
   const [isTwoPlayers, setIsTwoPlayers] = useState<boolean>(true);
   const [score, setScore] = useState<number[]>([0, 0]);
+  const combinations = generateWinningCombinations(gridSize);
+  const [winningCombinations, setWinningCombinations] =
+    useState<number[][]>(combinations);
 
   const updateScore = (winner: string) => {
     setScore((prevScore) => [
@@ -29,8 +28,9 @@ export const GameBoard = () => {
   };
   const checkWinner = (boxes: string[]) => {
     for (let combination of winningCombinations) {
-      const [a, b, c] = combination;
-      if (boxes[a] && boxes[a] === boxes[b] && boxes[a] === boxes[c]) {
+      const [a] = combination;
+      if (boxes[a] && combination.every((index) => boxes[index] === boxes[a])) {
+        console.log(combination);
         setWinner(boxes[a]);
         updateScore(boxes[a]);
         return;
@@ -69,7 +69,7 @@ export const GameBoard = () => {
     }
   };
   const resetGame = () => {
-    setBoxes(Array(9).fill(""));
+    setBoxes(Array(gridSize * gridSize).fill(""));
     setIsXTurn(true);
     setWinner("");
   };
@@ -79,8 +79,13 @@ export const GameBoard = () => {
       return () => clearTimeout(timer);
     }
   }, [isXTurn, winner, isTwoPlayers]);
+
+  useEffect(() => {
+    resetGame();
+    setWinningCombinations(combinations);
+  }, [gridSize]);
   return (
-    <div className="w-full">
+    <div className={`w-[${containerSize}px] mx-auto`}>
       <div className="mb-2 flex items-center justify-between">
         <span>Player {isXTurn ? "X" : "O"} is playing now.</span>
         <Button
@@ -90,12 +95,16 @@ export const GameBoard = () => {
           isSmall
         />
       </div>
-      <div className="grid grid-cols-3 gap-2 w-full">
+      <div
+        className="grid gap-2 w-full"
+        style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
+      >
         {boxes.map((box, key) => (
           <div
-            className={`h-[150px] bg-light-gray box-border rounded-xl ${
+            className={`bg-light-gray box-border rounded-xl  ${
               !box && "cursor-pointer hover:scale-105"
             }`}
+            style={{ height: ratio + "px" }}
             key={key}
             onClick={() => handleClick(key)}
           >
@@ -111,7 +120,18 @@ export const GameBoard = () => {
       </div>
       <div className="mt-6 mb-4 flex items-center justify-between">
         <Score x={score[0]} o={score[1]} />
-        <Button onClick={resetGame} text="Reset Game" />
+        <div className="mx-2 text-left">
+          <label>Grid:</label>
+          <input
+            type="number"
+            value={gridSize}
+            className="rounded-md ml-2 w-14 text-icon-blue font-extrabold px-2"
+            onChange={(e: any) => setGridSize(e.target.value)}
+            max={8}
+            min={3}
+          />
+        </div>
+        <Button onClick={resetGame} text="Reset" />
       </div>
       {winner && <Modal winner={winner} onReset={resetGame} />}
     </div>
